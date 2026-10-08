@@ -230,7 +230,7 @@ function send_redirect()
 	case "$code" in
 		301|302|303|307|308) ;;
 		*)
-			log "MISCONFIGURED: send_redirect got code '$code', which is not a redirect"
+			log_error "MISCONFIGURED: send_redirect got code '$code', which is not a redirect"
 			send_error 500
 			;;
 	esac

@@ -21,7 +21,6 @@ set -efu
 # * `MAX_BODY_SIZE`
 # * `MAX_HEADERS_SIZE`
 # * `REQUEST_FULL_STRING`
-# * `DEBUG_LOG`
 #
 # To do so, it will read from the standard input the received request, and execute
 # `read_request` to initialize everything.
@@ -44,7 +43,7 @@ function init_environment()
 	# Assigned apart from `declare`, whose zero return would hide a `realpath` failure from
 	if [ -z "${ROOT:-}" ]; then
 		declare -g ROOT
-		ROOT=$(realpath .) || { log "FATAL: cannot canonicalize '$PWD'"; exit 1; }
+		ROOT=$(realpath .) || { log_error "FATAL: cannot canonicalize '$PWD'"; exit 1; }
 	fi
 	export ROOT
 	# Public: The method of the request (one of GET, HEAD, POST and OPTIONS)
@@ -159,11 +158,6 @@ function init_environment()
 	# Filled by `_read_request_line()` when the target proves absolute-form, applied over
 	# the `Host` header by `_read_request_headers()`.
 	declare -g _REQUEST_AUTHORITY=''
-	# Public: `true` when verbose logging is on, see `log_debug()`
-	#
-	# Read from the environment because that is the only channel that survives the exec into
-	# a child script: `server.sh --debug` exports `DEBUG`, and so does `systemd`.
-	declare -rg DEBUG_LOG="${DEBUG:-0}"
 
 	# if REQUEST_FULL_STRING is empty, we fill it with the input stream and we export it
 	if [ -z "$REQUEST_FULL_STRING" ]; then

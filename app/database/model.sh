@@ -54,7 +54,7 @@ function model()
 function _model_check()
 {
 	if [ ! -v "_MODEL_TABLE[$1]" ]; then
-		log "MISCONFIGURED: no model '$1' (define it in app/models/)"
+		log_error "MISCONFIGURED: no model '$1' (define it in app/models/)"
 		return 1
 	fi
 }
@@ -119,7 +119,7 @@ function _qb_where()
 	fi
 	case "$operator" in
 		'='|'!='|'<>'|'<'|'<='|'>'|'>='|'LIKE'|'NOT LIKE') ;;
-		*)	log "DB ERROR: unsupported operator '$2'"
+		*)	log_error "DB ERROR: unsupported operator '$2'"
 			return 1 ;;
 	esac
 	db_ident ident "$column" || return 1
@@ -134,7 +134,7 @@ function order_by()
 	db_ident ident "$1" || return 1
 	direction="${direction^^}"
 	if [ "$direction" != ASC ] && [ "$direction" != DESC ]; then
-		log "DB ERROR: bad sort direction '$2'"
+		log_error "DB ERROR: bad sort direction '$2'"
 		return 1
 	fi
 	_QB_ORDER+="${_QB_ORDER:+, }$ident $direction"
@@ -153,7 +153,7 @@ function offset()
 function _qb_number()
 {
 	if [[ ! "$2" =~ ^[0-9]+$ ]]; then
-		log "DB ERROR: '$2' is not a number"
+		log_error "DB ERROR: '$2' is not a number"
 		return 1
 	fi
 	printf -v "$1" '%s' "$2"

@@ -42,6 +42,24 @@ if [ "${1:-}" = '--version' ]; then
 	exit 0
 fi
 
+# the mode and the log level (config/app.sh), checked once here rather than failing on
+# every request, then exported for bootstrap/app.sh
+source config/app.sh
+case "$APP_ENV" in
+	local|development|production) ;;
+	*)	printf 'Conch: APP_ENV must be local, development or production, got %s\n' "$APP_ENV" >&2
+		exit 1 ;;
+esac
+case "$LOG_LEVEL" in
+	debug|info|error|none) ;;
+	*)	printf 'Conch: LOG_LEVEL must be debug, info, error or none, got %s\n' "$LOG_LEVEL" >&2
+		exit 1 ;;
+esac
+if [ "$APP_ENV" = production ] && [ "$LOG_LEVEL" = debug ]; then
+	printf 'Conch: warning, debug logging in production writes every request and response in full\n' >&2
+fi
+export APP_ENV LOG_LEVEL
+
 # the port: the argument, else `PORT` (from `.env` or the environment, as hosting
 # platforms set it), else 3000
 port="${1:-${PORT:-3000}}"
@@ -77,7 +95,8 @@ case "${socat_options[*]}" in
 		;;
 esac
 
-printf 'Conch %s started, listening on %s\n' "$VERSION" "$port" >&2
+printf 'Conch %s started in %s mode (log level %s), listening on %s\n' \
+	"$VERSION" "$APP_ENV" "$LOG_LEVEL" "$port" >&2
 
 
 # IFS joins the array into socat's one comma-separated argument, and dies with the exec

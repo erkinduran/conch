@@ -11,6 +11,9 @@ set -efu
 # Public: The full request string
 declare -g REQUEST_FULL_STRING=''
 
+# `LOG_LEVEL` as a number: 0 none, 1 error, 2 info, 3 debug (see app/helpers.sh)
+declare -g _LOG_LEVEL=2
+
 # Routes registered by `route()`, one entry per route in each of the four arrays
 declare -ga _ROUTE_METHODS=() _ROUTE_PATHS=() _ROUTE_CONTROLLERS=() _ROUTE_ACTIONS=()
 # Route groups declared by `route_group()` in config/routes.sh, and the prefix of the one

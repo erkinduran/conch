@@ -41,7 +41,7 @@ function db_query()
 		db_connect || return 1
 	fi
 	if ! _db_run "$1"; then
-		log "DB ERROR: $DB_ERROR"
+		log_error "DB ERROR: $DB_ERROR"
 		log_debug "  in: $1"
 		return 1
 	fi
@@ -53,7 +53,7 @@ function db_connect()
 	DB_ERROR=''
 	if ! _db_connect; then
 		DB_ERROR="cannot start the $DB_CONNECTION client"
-		log "DB ERROR: $DB_ERROR"
+		log_error "DB ERROR: $DB_ERROR"
 		return 1
 	fi
 	_DB_CONNECTED=1
@@ -104,7 +104,7 @@ function db_quote()
 function db_ident()
 {
 	if [[ ! "$2" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
-		log "DB ERROR: invalid identifier '$2'"
+		log_error "DB ERROR: invalid identifier '$2'"
 		return 1
 	fi
 	printf -v "$1" '%s%s%s' "$_DB_IDENT_QUOTE" "$2" "$_DB_IDENT_QUOTE"

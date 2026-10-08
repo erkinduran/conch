@@ -28,11 +28,11 @@ function _resolve_path()
 {
 	local authorized
 	if [[ ! -d $ROOT/$1 ]]; then
-		log "MISCONFIGURED: '$ROOT/$1' is not a directory"
+		log_error "MISCONFIGURED: '$ROOT/$1' is not a directory"
 		send_error 500
 	fi
 	if ! authorized=$(realpath "$ROOT/$1"); then
-		log "MISCONFIGURED: realpath failed on '$ROOT/$1'"
+		log_error "MISCONFIGURED: realpath failed on '$ROOT/$1'"
 		send_error 500
 	fi
 	# the contract is a relative path: an absolute one only ever comes from a `//x` URL,
@@ -176,7 +176,7 @@ function _get_mimetype()
 	ext="${ext,,}"
 
 	if [ ! -v "MIME_TYPES[$ext]" ]; then
-		log "unknown extension '$ext' for '$1', serving it as application/octet-stream"
+		log_error "unknown extension '$ext' for '$1', serving it as application/octet-stream"
 		printf '%s\n' 'application/octet-stream'
 		return 0
 	fi

@@ -18,7 +18,7 @@ function render()
 	local -r file="$ROOT/resources/views/$1.html"
 	shift
 	if [ ! -f "$file" ]; then
-		log "MISCONFIGURED: view '$file' not found"
+		log_error "MISCONFIGURED: view '$file' not found"
 		send_error 500
 	fi
 	local html='' pair

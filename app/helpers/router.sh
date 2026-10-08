@@ -19,7 +19,7 @@ function route_group()
 {
 	local prefix="${1%/}"
 	if [ "$#" -ne 2 ] || { [ -n "$prefix" ] && [[ $prefix != /* ]]; }; then
-		log "MISCONFIGURED: route_group wants /prefix file, got '$*'"
+		log_error "MISCONFIGURED: route_group wants /prefix file, got '$*'"
 		send_error 500
 	fi
 	_ROUTE_GROUP_PREFIXES+=("$prefix")
@@ -50,7 +50,7 @@ function load_route_groups()
 	for i in "${order[@]+"${order[@]}"}"; do
 		file="${_ROUTE_GROUP_FILES[i]}"
 		if [ ! -f "$file" ]; then
-			log "MISCONFIGURED: routes file '$file' not found (config/routes.sh)"
+			log_error "MISCONFIGURED: routes file '$file' not found (config/routes.sh)"
 			send_error 500
 		fi
 		_ROUTE_PREFIX="${_ROUTE_GROUP_PREFIXES[i]}"
@@ -84,7 +84,7 @@ export -f load_route_groups
 function route()
 {
 	if [ "$#" -ne 4 ] || [[ $2 != /* ]]; then
-		log "MISCONFIGURED: route wants METHOD /path Controller action, got '$*'"
+		log_error "MISCONFIGURED: route wants METHOD /path Controller action, got '$*'"
 		send_error 500
 	fi
 	_ROUTE_METHODS+=("$1")
@@ -150,17 +150,17 @@ function dispatch_route()
 		file="$ROOT/app/controllers/${_ROUTE_CONTROLLERS[i]}.sh"
 		action="${_ROUTE_ACTIONS[i]}"
 		if [ ! -f "$file" ]; then
-			log "MISCONFIGURED: controller '$file' not found"
+			log_error "MISCONFIGURED: controller '$file' not found"
 			send_error 500
 		fi
 		source "$file"
 		# `declare -F` and not `type`: an external command named like the action must not do
 		if ! declare -F "$action" > /dev/null; then
-			log "MISCONFIGURED: '$file' defines no '$action' function"
+			log_error "MISCONFIGURED: '$file' defines no '$action' function"
 			send_error 500
 		fi
 		"$action"
-		log "MISCONFIGURED: '${_ROUTE_CONTROLLERS[i]} $action' returned without a response"
+		log_error "MISCONFIGURED: '${_ROUTE_CONTROLLERS[i]} $action' returned without a response"
 		send_error 500
 	done
 	if [ -n "$allowed" ]; then

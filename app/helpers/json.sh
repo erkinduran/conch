@@ -120,7 +120,7 @@ function json_record()
 	for __json_column in "$@"; do
 		__json_key="${__json_column%:=}"
 		if [ ! -v "__json_record[$__json_key]" ]; then
-			log "MISCONFIGURED: json_record: no column '$__json_key'"
+			log_error "MISCONFIGURED: json_record: no column '$__json_key'"
 			return 1
 		fi
 		if [ "$__json_key" != "$__json_column" ]; then

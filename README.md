@@ -21,6 +21,29 @@ bash server.sh --debug    # ayrıntılı log
 
 `server.sh`, `bootstrap/app.sh`'yi kendisini çalıştıran bash ile (`$BASH`) başlatır. Böylece bütün zincir aynı bash sürümüyle çalışır.
 
+## Modlar ve loglar
+
+`.env` içindeki `APP_ENV` modu seçer: `local` (varsayılan), `development` ya da `production`.
+Mod, konsola ne yazılacağını belirleyen `LOG_LEVEL`'ın varsayılanını değiştirir.
+`LOG_LEVEL` ayrıca da verilebilir.
+
+| `LOG_LEVEL` | Yazılanlar | Varsayılan olduğu mod |
+|---|---|---|
+| `debug` | Aşağıdakilerin hepsi, artı istek ve cevabın tam dökümü | `--debug` ile |
+| `info` | Her cevap için bir erişim satırı, reddedilen isteğin sebebi (404, 400...) | `local`, `development` |
+| `error` | Yalnızca sunucu hataları: yapılandırma, veritabanı, Redis | `production` |
+| `none` | Hiçbir şey | |
+
+Controller'da üç fonksiyon var: `log_error` sunucu hatası için, `log` bilgi için, `log_debug`
+ayrıntı için. Kod içinden mod `$APP_ENV` ile okunur:
+
+```bash
+if [ "$APP_ENV" != production ]; then log "ayrıntı: $x"; fi
+```
+
+`server.sh` geçersiz bir mod ya da seviyeyle başlamaz, başlarken modu yazar:
+`Conch 1.1 started in production mode (log level error), listening on 8080`.
+
 ## Klasör yapısı
 
 ```
@@ -34,6 +57,7 @@ public/                   statik dosyalar, /public/... adresinden sunulur
 app/helpers.sh            log(), log_debug(); app/globals.sh ve app/helpers/*.sh'yi yükler
 app/globals.sh            tepe seviye `declare -g` durumu (rota tabloları, REQUEST_FULL_STRING)
 app/helpers/*.sh          request (istek okuma), response, files, url, html, router, render, json
+config/app.sh             mod (APP_ENV) ve log seviyesi (LOG_LEVEL)
 config/database.sh        veritabanı ayarları (varsayılanlar; ortam ve `.env` üstüne yazar)
 app/database/             bağlantı (connection.sh), sürücüler (drivers/), redis.sh, model.sh
 app/models/*.sh           model tanımları (`model User users id name email`)

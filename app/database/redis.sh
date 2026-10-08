@@ -41,7 +41,7 @@ function redis()
 	fi
 	_redis_read || return 1
 	if [ "$REDIS_TYPE" = error ]; then
-		log "REDIS ERROR: $REDIS_REPLY"
+		log_error "REDIS ERROR: $REDIS_REPLY"
 		return 1
 	fi
 }
@@ -49,9 +49,11 @@ function redis()
 function _redis_connect()
 {
 	# a failed `exec` redirection in a non-interactive shell would end the process; inside
-	# a function with `||` it only returns, as tested
-	if ! exec {_REDIS_FD}<>"/dev/tcp/$REDIS_HOST/$REDIS_PORT"; then
-		log "REDIS ERROR: cannot connect to $REDIS_HOST:$REDIS_PORT"
+	# a function with `||` it only returns, as tested. The braces carry the `2>/dev/null`:
+	# bash's own "Connection refused" lines would ignore `LOG_LEVEL`, and on a bare `exec`
+	# the redirection would close stderr for good
+	if ! { exec {_REDIS_FD}<>"/dev/tcp/$REDIS_HOST/$REDIS_PORT"; } 2>/dev/null; then
+		log_error "REDIS ERROR: cannot connect to $REDIS_HOST:$REDIS_PORT"
 		_REDIS_FD=''
 		return 1
 	fi
@@ -65,7 +67,7 @@ function _redis_connect()
 
 function _redis_drop()
 {
-	log "REDIS ERROR: $1"
+	log_error "REDIS ERROR: $1"
 	exec {_REDIS_FD}>&- 2>/dev/null || true
 	_REDIS_FD=''
 }
