@@ -2,16 +2,19 @@
 <html lang="tr">
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>{{ title }}</title>
+	<style>
+		body { font: 16px/1.6 system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
+		li span { color: #6b6760; }
+		.note, .visits { color: #6b6760; font-size: .9rem; }
+	</style>
 </head>
 <body>
 	<h1>{{ title }} ({{ count }})</h1>
 	<ul>{{ items }}</ul>
-	<form method="post" action="/users">
-		<label>Ad <input name="name" required></label>
-		<label>E-posta <input name="email" type="email" required></label>
-		<button>Ekle</button>
-	</form>
-	<p><small>Bu sayfa {{ visits }} kez görüntülendi (Redis).</small></p>
+	<p class="note">Salt okunur örnek: kayıtlar <code>database/migrations</code> içindeki örnek veriden gelir. Model, controller ve view birlikte nasıl çalışır, onu gösterir.</p>
+	{{ visits }}
+	<p><a href="/">← Ana sayfa</a></p>
 </body>
 </html>

@@ -173,7 +173,8 @@ delete user
 - Model fonksiyonları `find`, `all`, `first`, `get`, `count`, `new`, `fill`, `save`, `create`,
   `delete`, `row`, `query`, `where*`, `order_by`, `limit`, `offset` adlarını kullanır;
   `find` istek sürecinde `find` komutunu gölgeler (hiç çağrılmıyor).
-- Örnek: `app/controllers/Users.sh`, `/users` rotaları.
+- Örnek: `app/controllers/Users.sh`, `/users` rotaları. Örnek salt okunurdur: kayıtlar
+  `0002_seed_users.sql` migrasyonundan gelir, sitede kayıt ekleyen bir form ya da `POST` rotası yoktur.
 
 ### Redis
 

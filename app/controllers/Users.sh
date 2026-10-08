@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# A read-only example: the users come from the seed migration, the site takes no input.
+# `create User user REQUEST_BODY_PARAMETERS` is how a form would add one (see README).
+
 # GET /users
 function index()
 {
@@ -13,11 +16,11 @@ function index()
 		row user "$record"
 		html_escape_to name "${user[name]}"
 		html_escape_to email "${user[email]}"
-		items+="<li><a href=\"/users/${user[id]}\">$name</a> &lt;$email&gt;</li>"
+		items+="<li><a href=\"/users/${user[id]}\">$name</a> <span>$email</span></li>"
 	done
-	# a Redis counter; the page does without it when Redis is not there
+	# a Redis counter, shown only when Redis is there
 	if redis INCR 'conch:users:visits'; then
-		visits="$REDIS_REPLY"
+		visits="<p class=\"visits\">Bu sayfa $REDIS_REPLY kez görüntülendi (Redis).</p>"
 	fi
 	render 'users' 'title=Kullanıcılar' "count=${#users[@]}" "items=$items" "visits=$visits"
 }
@@ -31,16 +34,4 @@ function show()
 	html_escape_to name "${user[name]}"
 	html_escape_to email "${user[email]}"
 	render 'user' "title=$name" "id=${user[id]}" "name=$name" "email=$email"
-}
-
-# POST /users, from the form on /users
-function store()
-{
-	local -A user
-	if [ -z "${REQUEST_BODY_PARAMETERS[name]:-}" ] || [ -z "${REQUEST_BODY_PARAMETERS[email]:-}" ]; then
-		send_error 400
-	fi
-	# only the fillable columns of `User` are copied from the form
-	create User user REQUEST_BODY_PARAMETERS || send_error 500
-	send_redirect "/users/${user[id]}" 303
 }
