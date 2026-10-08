@@ -10,8 +10,9 @@ Bash ve socat ile yazılmış küçük bir web framework'ü: router, controller,
 
 ```sh
 # macOS (MacPorts: port install bash socat)
-bash server.sh            # varsayılan port 3000
-bash server.sh 8080       # başka port
+bash server.sh            # port: .env/ortamdaki PORT, yoksa 3000
+bash server.sh 8080       # başka port (PORT'un önüne geçer)
+PORT=8080 bash server.sh  # aynısı, ortamdan
 bash server.sh --debug    # ayrıntılı log
 
 # Linux

@@ -31,7 +31,7 @@ if [ -f .env ]; then
 	set +a
 fi
 
-# the environment is the only thing the dispatcher and the scripts it runs inherit from us
+# the environment is the only thing bootstrap/app.sh and the scripts it runs inherit from us
 if [ "${1:-}" = '--debug' ]; then
 	export DEBUG=1
 	shift
@@ -42,15 +42,23 @@ if [ "${1:-}" = '--version' ]; then
 	exit 0
 fi
 
+# the port: the argument, else `PORT` (from `.env` or the environment, as hosting
+# platforms set it), else 3000
+port="${1:-${PORT:-3000}}"
+if [[ ! "$port" =~ ^[0-9]+$ ]] || [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
+	printf 'Conch: invalid port %s (argument or PORT)\n' "$port" >&2
+	exit 1
+fi
+
 # Options for socat: everything a user may want to tune is one line here.
 declare -a socat_options
 # the listening port and IP stack — keep exactly one of the three *-LISTEN lines
 # (ipv6only=0 makes the IPv6 socket answer IPv4 clients too; TCP4 doesn't know the option)
-#socat_options+=("TCP4-LISTEN:${1:-3000}")
-socat_options+=("TCP6-LISTEN:${1:-3000}" 'ipv6only=0')
+#socat_options+=("TCP4-LISTEN:$port")
+socat_options+=("TCP6-LISTEN:$port" 'ipv6only=0')
 # HTTPS: the same dual-stack listener behind TLS — generate the certificate first, see docs/https.md
 # (pf=ip4 instead of pf=ip6,ipv6only=0 for IPv4 only; verify=0 = don't ask a *client* certificate)
-#socat_options+=("OPENSSL-LISTEN:${1:-3000}" 'pf=ip6' 'ipv6only=0')
+#socat_options+=("OPENSSL-LISTEN:$port" 'pf=ip6' 'ipv6only=0')
 #socat_options+=("cert=$PWD/certs/cert.pem" "key=$PWD/certs/key.pem")
 #socat_options+=('verify=0' 'openssl-min-proto-version=TLS1.3')
 # ~6 connections a browser opens per user, times the number of simultaneous users
@@ -69,7 +77,7 @@ case "${socat_options[*]}" in
 		;;
 esac
 
-printf 'Conch %s started, listening on %s\n' "$VERSION" "${1:-3000}" >&2
+printf 'Conch %s started, listening on %s\n' "$VERSION" "$port" >&2
 
 
 # IFS joins the array into socat's one comma-separated argument, and dies with the exec
