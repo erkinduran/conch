@@ -8,7 +8,7 @@ function index()
 {
 	local -a users
 	local -A user
-	local record items='' name email visits=''
+	local record items='' name email
 	query User || send_error 500
 	order_by name || send_error 500
 	get users || send_error 500
@@ -18,11 +18,7 @@ function index()
 		html_escape_to email "${user[email]}"
 		items+="<li><a href=\"/users/${user[id]}\">$name</a> <span>$email</span></li>"
 	done
-	# a Redis counter, shown only when Redis is there
-	if redis INCR 'conch:users:visits'; then
-		visits="<p class=\"visits\">Bu sayfa $REDIS_REPLY kez görüntülendi (Redis).</p>"
-	fi
-	render 'users' 'title=Kullanıcılar' "count=${#users[@]}" "items=$items" "visits=$visits"
+	render 'users' 'title=Kullanıcılar' "count=${#users[@]}" "items=$items"
 }
 
 # GET /users/{id}

@@ -211,8 +211,8 @@ redis LRANGE liste 0 -1 && printf '%s\n' "${REDIS_ARRAY[@]}"
 
 Hata cevabı (`-ERR`) veya bağlantı sorunu loglanır, 1 döner.
 
-Ölçüm (8 Ekim 2026, sqlite + Redis): `GET /users` **~48 ms** (`GET /` 26 ms): sqlite3
-fork'u ~13 ms, Redis bağlantısı ~6 ms, gerisi sorgular. mysql sürücüsü canlı sunucuya karşı
+Ölçüm (8 Ekim 2026, sqlite): `GET /users` **~38 ms** (`GET /` ~27 ms): farkın çoğu sqlite3
+fork'u (~13 ms). Bir Redis bağlantısı ~6 ms ekler. mysql sürücüsü canlı sunucuya karşı
 test edilmedi (ayrıştırıcı örnek çıktıyla test edildi); sqlite ve pgsql uçtan uca test edildi.
 
 ## JSON
