@@ -1,0 +1,22 @@
+# local settings and credentials: copy .env.example to .env
+.env
+
+# the sqlite database, created by scripts/migrate.sh
+database/*.sqlite
+database/*.sqlite-journal
+database/*.sqlite-wal
+database/*.sqlite-shm
+
+# TLS keys for OPENSSL-LISTEN (see server.sh)
+certs/
+
+# logs
+*.log
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~

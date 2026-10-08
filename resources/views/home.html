@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{ title }}</title>
+	<meta name="description" content="Conch: bash ve socat ile yazılmış küçük bir web framework'ü.">
+	<style>
+		:root {
+			--bg: #fbfaf7;
+			--surface: #ffffff;
+			--text: #1c1b19;
+			--muted: #6b6760;
+			--border: #e7e3dc;
+			--accent: #2f7d4f;
+			--accent-soft: #e6f2ea;
+			--code-bg: #1e1f1c;
+			--code-text: #e8e6df;
+			--code-muted: #8f8b80;
+			--code-key: #9bd18f;
+			--code-str: #e6c07b;
+		}
+		@media (prefers-color-scheme: dark) {
+			:root {
+				--bg: #141513;
+				--surface: #1c1d1a;
+				--text: #ecebe6;
+				--muted: #a29e94;
+				--border: #2e2f2b;
+				--accent: #6cc08b;
+				--accent-soft: #1f3327;
+				--code-bg: #0f100e;
+			}
+		}
+		* { box-sizing: border-box; }
+		body {
+			margin: 0;
+			background: var(--bg);
+			color: var(--text);
+			font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+		}
+		a { color: var(--accent); }
+		code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+		.wrap { max-width: 64rem; margin: 0 auto; padding: 0 1rem; }
+
+		header.top {
+			display: flex; align-items: center; justify-content: space-between;
+			padding: 1.25rem 0;
+		}
+		.logo { font-weight: 700; font-size: 1.05rem; color: var(--text); text-decoration: none; }
+		.logo span { color: var(--accent); font-family: ui-monospace, Menlo, monospace; }
+		nav a { margin-left: 1.25rem; color: var(--muted); text-decoration: none; font-size: .95rem; }
+		nav a:hover { color: var(--text); }
+
+		.hero { padding: 4rem 0 3rem; display: grid; gap: 2.5rem; grid-template-columns: 1.1fr 1fr; align-items: center; }
+		.badge {
+			display: inline-block; padding: .2rem .65rem; border-radius: 999px;
+			background: var(--accent-soft); color: var(--accent); font-size: .8rem; font-weight: 600;
+		}
+		h1 { font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.1; margin: 1rem 0; letter-spacing: -.02em; }
+		.lead { font-size: 1.15rem; color: var(--muted); margin: 0 0 1.75rem; }
+		.actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+		.btn {
+			display: inline-block; padding: .7rem 1.2rem; border-radius: .5rem;
+			text-decoration: none; font-weight: 600; font-size: .95rem;
+			border: 1px solid var(--border); color: var(--text); background: var(--surface);
+		}
+		.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+		@media (prefers-color-scheme: dark) { .btn.primary { color: #0f100e; } }
+
+		pre {
+			margin: 0; padding: 1.1rem 1.25rem; border-radius: .75rem;
+			background: var(--code-bg); color: var(--code-text);
+			font-size: .85rem; line-height: 1.65; overflow-x: auto;
+		}
+		.c { color: var(--code-muted); }
+		.k { color: var(--code-key); }
+		.s { color: var(--code-str); }
+
+		section { padding: 3rem 0; border-top: 1px solid var(--border); }
+		h2 { font-size: 1.6rem; margin: 0 0 .5rem; letter-spacing: -.01em; }
+		.sub { color: var(--muted); margin: 0 0 2rem; }
+
+		.grid { display: grid; gap: 1rem; grid-template-columns: repeat(3, 1fr); }
+		.card {
+			background: var(--surface); border: 1px solid var(--border);
+			border-radius: .75rem; padding: 1.25rem;
+		}
+		.card h3 { margin: 0 0 .35rem; font-size: 1.02rem; }
+		.card p { margin: 0; color: var(--muted); font-size: .93rem; }
+		.card code { font-size: .85em; color: var(--text); }
+
+		.steps { display: grid; gap: 1.5rem; grid-template-columns: repeat(3, 1fr); }
+		.step h3 { font-size: 1rem; margin: 0 0 .6rem; }
+		.step h3 b { color: var(--accent); margin-right: .35rem; }
+
+		.demo { display: flex; flex-wrap: wrap; gap: .75rem; }
+		.demo a {
+			font-family: ui-monospace, Menlo, monospace; font-size: .9rem;
+			padding: .5rem .85rem; border: 1px solid var(--border); border-radius: .5rem;
+			background: var(--surface); text-decoration: none;
+		}
+
+		footer { padding: 2rem 0 3rem; border-top: 1px solid var(--border); color: var(--muted); font-size: .88rem; }
+		footer code { color: var(--text); }
+
+		@media (max-width: 820px) {
+			.hero { grid-template-columns: 1fr; padding-top: 2.5rem; }
+			.grid, .steps { grid-template-columns: 1fr; }
+			nav a { margin-left: .9rem; }
+		}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<header class="top">
+			<a class="logo" href="/"><span>$</span> conch</a>
+			<nav>
+				<a href="#ozellikler">Özellikler</a>
+				<a href="#baslangic">Başlangıç</a>
+				<a href="#demo">Demo</a>
+			</nav>
+		</header>
+
+		<div class="hero">
+			<div>
+				<span class="badge">bash ≥ 4.3 · socat</span>
+				<h1>Saf bash ile bir web framework'ü.</h1>
+				<p class="lead">Router, controller, view, model ve JSON API. Hepsi tek bir bash süreci içinde, istek başına neredeyse hiç fork açmadan çalışır.</p>
+				<div class="actions">
+					<a class="btn primary" href="#baslangic">Başla</a>
+					<a class="btn" href="/users">Örnek uygulama</a>
+				</div>
+			</div>
+<pre><span class="c"># routes/web.sh</span>
+<span class="k">route</span> GET  <span class="s">'/'</span>           <span class="s">'Home'</span>  <span class="s">'index'</span>
+<span class="k">route</span> GET  <span class="s">'/users/{id}'</span> <span class="s">'Users'</span> <span class="s">'show'</span>
+
+<span class="c"># app/controllers/Users.sh</span>
+<span class="k">function</span> show()
+{
+	<span class="k">local</span> -A user
+	<span class="k">find</span> User <span class="s">"${ROUTE_PARAMETERS[id]}"</span> user \
+		|| <span class="k">send_error</span> 404
+	<span class="k">render</span> <span class="s">'user'</span> <span class="s">"name=${user[name]}"</span>
+}</pre>
+		</div>
+
+		<section id="ozellikler">
+			<h2>Neler var?</h2>
+			<p class="sub">Bir web framework'ünden beklenen parçalar, kısa ve tanıdık fonksiyon adlarıyla.</p>
+			<div class="grid">
+				<div class="card">
+					<h3>Router ve rota grupları</h3>
+					<p><code>{id}</code> parametreleri, 404/405 ayrımı. <code>config/routes.sh</code> ile <code>/api</code>, <code>/api/v2</code> gibi prefix grupları.</p>
+				</div>
+				<div class="card">
+					<h3>Controller</h3>
+					<p>Her action sıradan bir bash fonksiyonu. Controller istek sürecinde <code>source</code> edilir, fork açılmaz.</p>
+				</div>
+				<div class="card">
+					<h3>View</h3>
+					<p><code>resources/views</code> altındaki HTML şablonları, <code>render</code> ile doldurulan yer tutucularla.</p>
+				</div>
+				<div class="card">
+					<h3>Dört veri kaynağı</h3>
+					<p>SQLite, MySQL ve PostgreSQL. Hangisinin kullanılacağını <code>DB_CONNECTION</code> belirler. Redis'e doğrudan <code>/dev/tcp</code> üzerinden bağlanılır.</p>
+				</div>
+				<div class="card">
+					<h3>Modeller</h3>
+					<p><code>find</code>, <code>where</code>, <code>order_by</code>, <code>get</code>, <code>create</code>, <code>save</code>, <code>delete</code>. Değerler her zaman kaçışlanır.</p>
+				</div>
+				<div class="card">
+					<h3>JSON API</h3>
+					<p><code>json_record</code>, <code>json_collection</code>, <code>json_error</code> ile yanıtı kurar, <code>json</code> ile gönderirsiniz.</p>
+				</div>
+			</div>
+		</section>
+
+		<section id="baslangic">
+			<h2>Üç adımda başlangıç</h2>
+			<p class="sub">macOS'ta <code>/bin/bash</code> 3.2 olduğu için sunucu PATH'teki yeni bash ile başlatılır.</p>
+			<div class="steps">
+				<div class="step">
+					<h3><b>1</b> Ayarla</h3>
+<pre><span class="k">cp</span> .env.example .env
+<span class="c"># DB_CONNECTION=sqlite</span>
+<span class="c"># DB_CONNECTION=pgsql</span></pre>
+				</div>
+				<div class="step">
+					<h3><b>2</b> Migrasyon</h3>
+<pre><span class="k">bash</span> scripts/migrate.sh</pre>
+				</div>
+				<div class="step">
+					<h3><b>3</b> Çalıştır</h3>
+<pre><span class="k">bash</span> server.sh
+<span class="c"># http://localhost:3000</span></pre>
+				</div>
+			</div>
+		</section>
+
+		<section id="demo">
+			<h2>Canlı demo</h2>
+			<p class="sub">Bu sunucuda şu an çalışan örnek rotalar.</p>
+			<div class="demo">
+				<a href="/hello/dunya">GET /hello/dunya</a>
+				<a href="/users">GET /users</a>
+				<a href="/users/1">GET /users/1</a>
+				<a href="/api/users">GET /api/users</a>
+				<a href="/api/users/1">GET /api/users/1</a>
+			</div>
+		</section>
+
+		<footer>
+			Bu sayfa bash <code>{{ bash }}</code> ile, <code>{{ driver }}</code> sürücüsü yapılandırılmışken sunuldu.
+		</footer>
+	</div>
+</body>
+</html>
